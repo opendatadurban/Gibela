@@ -1,14 +1,26 @@
-from flask_wtf import Form
-from wtforms import StringField, BooleanField, IntegerField, FormField
-from wtforms.validators import DataRequired
+from flask_wtf import Form as BaseForm
 
 
-class TelephoneForm(Form):
-    area_code = IntegerField('Area Code', validators=[DataRequired()])
-    number = StringField('Number')
+class StripFilter():
+    def __call__(self, value):
+        if value is not None and hasattr(value, 'strip'):
+            return value.strip()
+        else:
+            return value
 
 
-class LoginForm(Form):
-    user_id = StringField('User ID', validators=[DataRequired()])
-    phone = FormField(TelephoneForm)
-    remember_me = BooleanField('remember_me', default=False)
+class Form(BaseForm):
+    """ A form that strips the values of all its fields. """
+    _decorated = False
+
+    def __init__(self, *args, **kwargs):
+        self._obj = kwargs.get('obj')
+        super(Form, self).__init__(*args, **kwargs)
+
+    def process(self, *args, **kwargs):
+        if not self._decorated:
+            self._decorated = True
+            for field in self._fields.itervalues():
+                field.filters = [StripFilter()] + list(field.filters)
+
+        super(Form, self).process(*args, **kwargs)

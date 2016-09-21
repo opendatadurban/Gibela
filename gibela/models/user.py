@@ -33,6 +33,7 @@ class User(db.Model, UserMixin):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.current_timestamp())
 
     # associations
+    rides = db.relationship('Rider', backref=db.backref('riders', lazy='dynamic'), lazy='dynamic')
     roles = db.relationship('Role', secondary='roles_users', backref=db.backref('users', lazy='dynamic'))
 
     def __repr__(self):
