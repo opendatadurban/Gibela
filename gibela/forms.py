@@ -1,10 +1,9 @@
-from flask.ext.wtf import Form
+from flask_wtf import Form
 from wtforms import StringField, BooleanField, IntegerField, FormField
 from wtforms.validators import DataRequired
 
 
 class TelephoneForm(Form):
-    # country_code = IntegerField('Country Code', [validators.required()])
     area_code = IntegerField('Area Code', validators=[DataRequired()])
     number = StringField('Number')
 

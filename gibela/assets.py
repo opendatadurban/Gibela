@@ -1,5 +1,5 @@
 from gibela.app import app
-from flask.ext.assets import Environment, Bundle
+from flask_assets import Environment, Bundle
 
 assets = Environment(app)
 assets.url_expire = False

@@ -1,10 +1,9 @@
 from sqlalchemy.dialects.postgresql import JSON
-
 from gibela.app import db
 
 
-class Result(db.Model):
-    __tablename__ = 'users'
+class Rider(db.Model):
+    __tablename__ = 'riders'
 
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String())

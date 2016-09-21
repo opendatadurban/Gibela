@@ -1,12 +1,10 @@
 from gibela.app import app
-from flask import request, url_for, flash, redirect
+from flask import url_for, redirect
 from flask_mako import render_template
 from flask_security import current_user
-from sqlalchemy.sql import func
 
-from gibela.models import db, Rider, Provider
-import gibela.riders
-import gibela.providers
+import gibela.rider
+import gibela.provider
 
 
 @app.route('/')
