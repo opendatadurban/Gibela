@@ -27,7 +27,7 @@
             %ul.nav.navbar-nav.navbar-right
               %li
                 %a.dropdown-toggle(href="#", dataToggle='dropdown')
-                  &= current_user.full_name()
+                  &= current_user.name
                   %b.caret
                 %ul.dropdown-menu
                   %li
@@ -47,5 +47,7 @@
 
     %%include(file='_footer.haml')
 
-    - for url in webassets('js'):
-      %script(src=url)
+    -#- for url in webassets('js'):
+    -#  %script(src=url)
+
+    %%block(name="extra_javascript")

@@ -1,5 +1,5 @@
 from sqlalchemy.dialects.postgresql import JSON
-from gibela.app import db
+from ..app import db
 from ..forms import Form
 from wtforms import StringField, IntegerField, FloatField, BooleanField, DateField
 from wtforms_components import TimeField
@@ -34,20 +34,18 @@ class Rider(db.Model):
     departure_2 = db.Column(db.Time)
     arrival_1 = db.Column(db.Time)
     arrival_2 = db.Column(db.Time)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
 
 class RequestForm(Form):
-    pass_no = db.Column(db.Integer)
     pass_no = IntegerField('Passenger Number', validators=[DataRequired()])
     lat_A = FloatField('Lat A', validators=[DataRequired()])
     lon_A = FloatField('Lon A', validators=[DataRequired()])
     lat_B = FloatField('Lat B', validators=[DataRequired()])
     lon_B = FloatField('Lon B', validators=[DataRequired()])
-
     w3w_A1 = StringField('W3WA1', validators=[DataRequired()])
     w3w_A2 = StringField('W3WA2', validators=[DataRequired()])
     w3w_A3 = StringField('W3WA3', validators=[DataRequired()])

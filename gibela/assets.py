@@ -122,6 +122,8 @@ def assets_helper(*args, **kwargs):
             result.append(f)
 
     bundle = Bundle(*result, **kwargs)
+    print assets
+    raw_input('...')
     urls = bundle.urls(env=assets)
 
     return urls

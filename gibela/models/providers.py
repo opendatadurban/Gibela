@@ -3,7 +3,7 @@ from gibela.app import db
 
 
 class Provider(db.Model):
-    __tablename__ = 'providers'
+    __tablename__ = 'seats'
 
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String())

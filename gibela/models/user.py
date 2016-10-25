@@ -12,9 +12,10 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import relationship
-from flask_security import UserMixin, RoleMixin, Security, SQLAlchemyUserDatastore
-from wtforms import StringField
-from wtforms.validators import DataRequired, Length
+from flask_security import UserMixin, RoleMixin, Security, SQLAlchemyUserDatastore, LoginForm
+from wtforms.fields.html5 import EmailField
+from wtforms import StringField, PasswordField, validators
+from wtforms.validators import DataRequired, Length, InputRequired
 
 
 class User(db.Model, UserMixin):
@@ -24,16 +25,18 @@ class User(db.Model, UserMixin):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
-    user_name = Column(String(50), nullable=False)
+    email = Column(String(50), index=True, nullable=False, unique=True)
+    password = Column(String(100), default='')
+    # user_name = Column(String(50), nullable=False)
     admin = Column(Boolean, default=False)
     disabled = Column(Boolean, default=False)
-    phone = Column(String(10), default='')
+    # phone = Column(String(10), default='')
 
     created_at = Column(DateTime(timezone=True), index=True, unique=False, nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.current_timestamp())
 
     # associations
-    rides = db.relationship('Rider', backref=db.backref('riders', lazy='dynamic'), lazy='dynamic')
+    # rides = db.relationship('Rider', backref=db.backref('riders', lazy='dynamic'), lazy='dynamic')
     roles = db.relationship('Role', secondary='roles_users', backref=db.backref('users', lazy='dynamic'))
 
     def __repr__(self):
@@ -53,10 +56,8 @@ class User(db.Model, UserMixin):
         from flask_security.utils import encrypt_password
 
         admin_user = User()
-        admin_user.first_name = "Admin"
-        admin_user.last_name = "Admin"
         admin_user.admin = True
-        admin_user.email = "matthew@opendata.durban"
+        admin_user.email = "admin@code4sa.org"
         admin_user.password = encrypt_password('admin')
         return [admin_user]
 
@@ -87,14 +88,12 @@ roles_users = db.Table('roles_users',
                        db.Column('role_id', db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE')))
 
 
-class LoginForm(Form):
-    user_name = StringField('Username',
-                            validators=[DataRequired(),
-                                        Length(min=10, max=10, message='Please enter a valid phone number')])
-    phone = StringField('Phone', validators=[DataRequired()])
+class LoginForm(LoginForm):
+    email = EmailField('Email', validators=[InputRequired()])
+    password = PasswordField('Password', validators=[InputRequired()])
 
 
 # user authentication
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore)
+security = Security(app, user_datastore, login_form=LoginForm)
 app.extensions['security'].render_template = render_template
