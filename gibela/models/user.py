@@ -1,5 +1,4 @@
 from ..app import db, app
-from ..forms import Form
 from flask_mako import render_template
 
 from sqlalchemy import (
@@ -12,10 +11,14 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import relationship
-from flask_security import UserMixin, RoleMixin, Security, SQLAlchemyUserDatastore, LoginForm
-from wtforms.fields.html5 import EmailField
+from flask_security import UserMixin, RoleMixin, Security, SQLAlchemyUserDatastore
+from flask_security.forms import LoginForm
 from wtforms import StringField, PasswordField, validators
 from wtforms.validators import DataRequired, Length, InputRequired
+
+roles_users = db.Table('roles_users',
+                       db.Column('user_id', db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE')),
+                       db.Column('role_id', db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE')))
 
 
 class User(db.Model, UserMixin):
@@ -24,23 +27,28 @@ class User(db.Model, UserMixin):
     """
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
-    email = Column(String(50), index=True, nullable=False, unique=True)
-    password = Column(String(100), default='')
-    # user_name = Column(String(50), nullable=False)
-    admin = Column(Boolean, default=False)
-    disabled = Column(Boolean, default=False)
-    # phone = Column(String(10), default='')
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(255), unique=True, index=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    password = db.Column(db.String(255))
+    active = db.Column(db.Boolean())
+    disabled = db.Column(db.Boolean(), default=False)
+    confirmed_at = db.Column(db.DateTime())
+    roles = db.relationship('Role', secondary=roles_users,
+                            backref=db.backref('users', lazy='dynamic'))
 
-    created_at = Column(DateTime(timezone=True), index=True, unique=False, nullable=False, server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.current_timestamp())
+    def full_name(self):
+        s = '%s %s' % (self.first_name or '', self.last_name or '')
+        s = s.strip()
 
-    # associations
-    # rides = db.relationship('Rider', backref=db.backref('riders', lazy='dynamic'), lazy='dynamic')
-    roles = db.relationship('Role', secondary='roles_users', backref=db.backref('users', lazy='dynamic'))
+        if not s:
+            s = self.username
+
+        return s
 
     def __repr__(self):
-        return "<User phone=%s>" % (self.phone,)
+        return "<User email=%s>" % (self.username,)
 
     # Flask-Security requires an active attribute
     @property
@@ -56,9 +64,11 @@ class User(db.Model, UserMixin):
         from flask_security.utils import encrypt_password
 
         admin_user = User()
-        admin_user.admin = True
-        admin_user.email = "admin@code4sa.org"
-        admin_user.password = encrypt_password('admin')
+        admin_user.username = "gibela"
+        admin_user.first_name = "Gibela"
+        admin_user.last_name = "Tester"
+        admin_user.password = encrypt_password('gibela')
+
         return [admin_user]
 
 
@@ -83,17 +93,16 @@ class Role(db.Model, RoleMixin):
         ]
 
 
-roles_users = db.Table('roles_users',
-                       db.Column('user_id', db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE')),
-                       db.Column('role_id', db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE')))
-
-
-class LoginForm(LoginForm):
-    email = EmailField('Email', validators=[InputRequired()])
-    password = PasswordField('Password', validators=[InputRequired()])
+class ExtendedLoginForm(LoginForm):
+    email = StringField('Username', [InputRequired()])
 
 
 # user authentication
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore, login_form=LoginForm)
+security = Security(app, user_datastore,
+                    login_form=ExtendedLoginForm)
 app.extensions['security'].render_template = render_template
+
+
+
+

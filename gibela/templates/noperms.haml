@@ -1,10 +1,12 @@
-%%inherit(file="login/base.haml")
+%%inherit(file="layout.haml")
+%%block(name="title")
+  Oops!
 
 %section
   %h2
     Hi
-    - if current_user.is_authenticated():
-      &= current_user.first_name or current_user.email
+    - if current_user.is_authenticated:
+      &= current_user.first_name or current_user.username
     - else:
       there
 

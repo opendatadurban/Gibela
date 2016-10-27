@@ -11,7 +11,13 @@ from .models.riders import RequestForm
 @login_required
 @roles_accepted('rider')
 def rider_dashboard():
-    form = RequestForm()
+    # form = RequestForm()
 
-    return render_template('rider/rider_dashboard.haml',
-                           form=form)
+    return render_template('rider/rider_dashboard.haml')
+
+@app.route('/new_ride')
+@login_required
+@roles_accepted('rider')
+def new_ride():
+    form = RequestForm()
+    return render_template('rider/new_ride.haml', form=form)

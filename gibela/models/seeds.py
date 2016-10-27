@@ -8,10 +8,10 @@ def seed_db(db):
         for x in User.create_defaults():
             db.session.add(x)
 
-        # db.session.flush()
+        db.session.flush()
 
-        # for x in Role.create_defaults():
-        #     db.session.add(x)
+        for x in Role.create_defaults():
+            db.session.add(x)
         #
         # for x in Rider.create_defaults():
         #     db.session.add(x)
